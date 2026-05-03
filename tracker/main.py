@@ -1,9 +1,7 @@
 """Entry point del GitHub Action. Orquesta búsqueda → análisis → persistencia."""
 
-import os
 import yaml
 from datetime import date, timedelta
-from tracker.search.amadeus_client import AmadeusClient
 from tracker.search.serpapi_client import SerpApiClient
 from tracker.search.multi_stop import find_arbitrage_combos
 from tracker.analyzer.baseline import compute_baseline, should_alert
@@ -13,7 +11,6 @@ from tracker.storage.supabase_client import SupabaseClient
 def run():
     cfg = yaml.safe_load(open("tracker/routes.yaml"))
     db = SupabaseClient()
-    amadeus = AmadeusClient()
     serpapi = SerpApiClient()
 
     for route in db.get_enabled_routes():
@@ -22,9 +19,10 @@ def run():
                 dep = date.today() + timedelta(days=offset)
                 ret = dep + timedelta(days=trip_len)
 
-                offers = amadeus.search(route["origin"], route["destination"], dep, ret)
+                offers = serpapi.search(route["origin"], route["destination"], dep, ret)
+
                 if not offers:
-                    offers = serpapi.search(route["origin"], route["destination"], dep, ret)
+                    continue
 
                 snapshot_ids = db.insert_snapshots(route["id"], offers, dep, ret)
 
@@ -45,7 +43,7 @@ def run():
                         route["destination"],
                         dep.isoformat(),
                         offers,
-                        amadeus.search,
+                        serpapi.search,
                     )
                     db.insert_multi_stop_combos(route["id"], combos, dep)
 

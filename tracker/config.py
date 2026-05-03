@@ -13,10 +13,6 @@ class _Settings:
     """Contenedor de configuración cargada desde variables de entorno."""
 
     def __init__(self):
-        self.AMADEUS_CLIENT_ID: str = self._require("AMADEUS_CLIENT_ID")
-        self.AMADEUS_CLIENT_SECRET: str = self._require("AMADEUS_CLIENT_SECRET")
-        self.AMADEUS_HOSTNAME: str = os.getenv("AMADEUS_HOSTNAME", "test")
-
         self.SERPAPI_KEY: str = self._require("SERPAPI_KEY")
 
         self.SUPABASE_URL: str = self._require("SUPABASE_URL")
@@ -33,12 +29,7 @@ class _Settings:
         return value
 
     def __repr__(self) -> str:
-        return (
-            f"Settings("
-            f"AMADEUS_CLIENT_ID=***, "
-            f"AMADEUS_HOSTNAME={self.AMADEUS_HOSTNAME!r}, "
-            f"SUPABASE_URL={self.SUPABASE_URL!r})"
-        )
+        return f"Settings(SUPABASE_URL={self.SUPABASE_URL!r})"
 
 
 Settings = _Settings()
