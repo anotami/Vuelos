@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { createServerClient } from '@/lib/supabase'
 import type { Alert, RouteSummary } from '@/lib/supabase'
 import { formatUSD, formatDate, calcDiscountPct } from '@/lib/utils'

@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { createServerClient } from '@/lib/supabase'
 import type { Route, PriceSnapshot } from '@/lib/supabase'
 import { formatUSD, formatDate, formatDateShort, durationToHours } from '@/lib/utils'
