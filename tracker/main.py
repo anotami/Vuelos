@@ -1,5 +1,6 @@
 """Entry point del GitHub Action. Orquesta búsqueda → análisis → persistencia."""
 
+import os
 import yaml
 from datetime import date, timedelta
 from tracker.search.serpapi_client import SerpApiClient
@@ -13,7 +14,16 @@ def run():
     db = SupabaseClient()
     serpapi = SerpApiClient()
 
-    for route in db.get_enabled_routes():
+    single_route_id = os.getenv("ROUTE_ID", "").strip() or None
+
+    all_routes = db.get_enabled_routes()
+    routes = (
+        [r for r in all_routes if r["id"] == single_route_id]
+        if single_route_id
+        else all_routes
+    )
+
+    for route in routes:
         for offset in cfg["defaults"]["search_window_days"]:
             for trip_len in cfg["defaults"]["trip_duration_days"]:
                 dep = date.today() + timedelta(days=offset)
