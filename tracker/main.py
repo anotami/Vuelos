@@ -23,13 +23,19 @@ def run():
         else all_routes
     )
 
+    errors = []
+
     for route in routes:
         for offset in cfg["defaults"]["search_window_days"]:
             for trip_len in cfg["defaults"]["trip_duration_days"]:
                 dep = date.today() + timedelta(days=offset)
                 ret = dep + timedelta(days=trip_len)
 
-                offers = serpapi.search(route["origin"], route["destination"], dep, ret)
+                try:
+                    offers = serpapi.search(route["origin"], route["destination"], dep, ret)
+                except Exception as exc:
+                    errors.append(f"{route['origin']}→{route['destination']} {dep}: {exc}")
+                    continue
 
                 if not offers:
                     continue
@@ -48,14 +54,24 @@ def run():
                     )
 
                 if cfg["defaults"]["multi_stop_enabled"] and route.get("multi_stop_enabled", True):
-                    combos = find_arbitrage_combos(
-                        route["origin"],
-                        route["destination"],
-                        dep.isoformat(),
-                        offers,
-                        serpapi.search,
-                    )
-                    db.insert_multi_stop_combos(route["id"], combos, dep)
+                    try:
+                        combos = find_arbitrage_combos(
+                            route["origin"],
+                            route["destination"],
+                            dep.isoformat(),
+                            offers,
+                            serpapi.search,
+                        )
+                        db.insert_multi_stop_combos(route["id"], combos, dep)
+                    except Exception as exc:
+                        errors.append(f"multi_stop {route['origin']}→{route['destination']}: {exc}")
+
+    if errors:
+        import sys
+        print(f"\n{len(errors)} errores durante la búsqueda:", file=sys.stderr)
+        for e in errors:
+            print(f"  - {e}", file=sys.stderr)
+        sys.exit(1)
 
 
 if __name__ == "__main__":

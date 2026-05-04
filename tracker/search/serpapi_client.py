@@ -139,8 +139,12 @@ class SerpApiClient:
             raise
 
         if "error" in result:
-            logger.error("SerpApi API error: %s", result["error"])
-            raise RuntimeError(f"SerpApi returned error: {result['error']}")
+            error_msg = result["error"]
+            if "hasn't returned any results" in error_msg or "No results" in error_msg:
+                logger.info("SerpApi: sin resultados para %s→%s %s", origin, destination, dep_str)
+                return []
+            logger.error("SerpApi API error: %s", error_msg)
+            raise RuntimeError(f"SerpApi returned error: {error_msg}")
 
         raw_flights: list[dict] = []
         raw_flights.extend(result.get("best_flights", []))
