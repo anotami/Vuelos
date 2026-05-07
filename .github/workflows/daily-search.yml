@@ -2,7 +2,7 @@ name: Daily Flight Search
 
 on:
   schedule:
-    - cron: '0 12 * * *'   # 07:00 Lima time (UTC-5)
+    - cron: '0 12 */3 * *'  # cada 3 días a las 07:00 Lima (UTC-5)
   workflow_dispatch:
     inputs:
       route_id:

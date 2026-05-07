@@ -1,8 +1,8 @@
 defaults:
-  search_window_days: [30, 60, 90, 120, 180]
+  search_window_days: [60]
   flex_days: 3
-  trip_duration_days: [10, 14, 21]
-  multi_stop_enabled: true
+  trip_duration_days: [14]
+  multi_stop_enabled: false
   hubs: [PTY, BOG, MIA, GRU, MEX, SCL]
 
 destinations:
