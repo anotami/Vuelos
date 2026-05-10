@@ -116,7 +116,7 @@ class SerpApiClient:
             "currency": "USD",
             "hl": "en",
             "api_key": self.api_key,
-            "type": "2" if return_date else "1",  # 1=one-way, 2=round-trip
+            "type": "1" if return_date else "2",  # 1=round-trip, 2=one-way
         }
         if return_date:
             params["return_date"] = str(return_date)[:10]
