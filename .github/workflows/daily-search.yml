@@ -38,6 +38,6 @@ jobs:
           username: ${{ secrets.NOTIFY_EMAIL }}
           password: ${{ secrets.NOTIFY_EMAIL_PWD }}
           subject: "Flight Tracker fallo"
-          to: ${{ secrets.NOTIFY_EMAIL }}
+          to: anotami@gmail.com
           from: Flight Tracker
           body: "Run ${{ github.run_id }} fallo. Ver: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
