@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useEffect, useState } from 'react'
 import {
   LayoutDashboard,
   Bell,
@@ -20,6 +21,14 @@ const navItems = [
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
+  const [apiCount, setApiCount] = useState<number | null>(null)
+
+  useEffect(() => {
+    fetch('/api/serpapi-usage')
+      .then(r => r.json())
+      .then(d => setApiCount(d.count ?? null))
+      .catch(() => {})
+  }, [])
 
   return (
     <div className="flex min-h-screen">
@@ -30,10 +39,21 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
           <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center shrink-0">
             <Plane size={18} className="text-slate-950" />
           </div>
-          <span className="font-semibold text-slate-100 text-sm leading-tight">
-            Flight Tracker<br />
-            <span className="text-emerald-400 font-normal">Lima</span>
-          </span>
+          <div className="flex flex-col min-w-0">
+            <span className="font-semibold text-slate-100 text-sm leading-tight">
+              Flight Tracker <span className="text-emerald-400 font-normal">Lima</span>
+            </span>
+            {apiCount !== null && (
+              <span className={cn(
+                'text-xs font-mono mt-0.5',
+                apiCount >= 95 ? 'text-red-400' :
+                apiCount >= 80 ? 'text-yellow-400' :
+                'text-slate-500'
+              )}>
+                {apiCount} consultas este mes
+              </span>
+            )}
+          </div>
         </div>
 
         {/* Nav */}

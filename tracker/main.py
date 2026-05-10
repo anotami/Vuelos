@@ -20,6 +20,7 @@ def run():
                 ret = dep + timedelta(days=trip_len)
 
                 offers = serpapi.search(route["origin"], route["destination"], dep, ret)
+                db.log_serpapi_call(route["origin"], route["destination"])
 
                 if not offers:
                     continue
