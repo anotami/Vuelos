@@ -2,7 +2,7 @@
 
 import yaml
 from datetime import date, timedelta
-from tracker.search.serpapi_client import SerpApiClient
+from tracker.search.router import FlightSearchRouter
 from tracker.search.multi_stop import find_arbitrage_combos
 from tracker.analyzer.baseline import compute_baseline, should_alert
 from tracker.storage.supabase_client import SupabaseClient
@@ -11,7 +11,7 @@ from tracker.storage.supabase_client import SupabaseClient
 def run():
     cfg = yaml.safe_load(open("tracker/routes.yaml"))
     db = SupabaseClient()
-    serpapi = SerpApiClient()
+    router = FlightSearchRouter()
 
     for route in db.get_enabled_routes():
         for offset in cfg["defaults"]["search_window_days"]:
@@ -19,8 +19,12 @@ def run():
                 dep = date.today() + timedelta(days=offset)
                 ret = dep + timedelta(days=trip_len)
 
-                offers = serpapi.search(route["origin"], route["destination"], dep, ret)
-                db.log_serpapi_call(route["origin"], route["destination"])
+                try:
+                    offers, provider = router.search(route["origin"], route["destination"], dep, ret)
+                    db.log_api_call(route["origin"], route["destination"], provider)
+                except RuntimeError:
+                    db.log_api_call(route["origin"], route["destination"], "all", success=False)
+                    raise
 
                 if not offers:
                     continue
@@ -44,7 +48,7 @@ def run():
                         route["destination"],
                         dep.isoformat(),
                         offers,
-                        serpapi.search,
+                        lambda o, d, dep2, ret2=None, **kw: router.search(o, d, dep2, ret2, **kw)[0],
                     )
                     db.insert_multi_stop_combos(route["id"], combos, dep)
 

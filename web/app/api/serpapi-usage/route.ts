@@ -9,14 +9,20 @@ export async function GET() {
   const now = new Date()
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
 
-  const { count, error } = await db
+  const { data, error } = await db
     .from('serpapi_call_log')
-    .select('*', { count: 'exact', head: true })
+    .select('provider')
     .gte('called_at', monthStart)
+    .eq('success', true)
 
   if (error) {
-    return NextResponse.json({ count: null, error: error.message }, { status: 500 })
+    return NextResponse.json({ total: null, byProvider: {}, error: error.message }, { status: 500 })
   }
 
-  return NextResponse.json({ count: count ?? 0 })
+  const byProvider: Record<string, number> = {}
+  for (const row of data ?? []) {
+    byProvider[row.provider] = (byProvider[row.provider] ?? 0) + 1
+  }
+
+  return NextResponse.json({ total: data?.length ?? 0, byProvider })
 }

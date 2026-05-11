@@ -200,16 +200,17 @@ class SupabaseClient:
     # Multi-stop combos
     # ------------------------------------------------------------------
 
-    def log_serpapi_call(self, origin: str, destination: str, success: bool = True) -> None:
-        """Registra una llamada a SerpApi para monitorear el uso de créditos."""
+    def log_api_call(self, origin: str, destination: str, provider: str, success: bool = True) -> None:
+        """Registra una llamada a la API de vuelos para monitorear el uso de créditos."""
         try:
             self._client.table("serpapi_call_log").insert({
                 "origin": origin,
                 "destination": destination,
+                "provider": provider,
                 "success": success,
             }).execute()
         except Exception as exc:
-            logger.warning("No se pudo registrar llamada SerpApi: %s", exc)
+            logger.warning("No se pudo registrar llamada API (%s): %s", provider, exc)
 
     def insert_multi_stop_combos(
         self,

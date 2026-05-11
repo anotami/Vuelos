@@ -21,12 +21,12 @@ const navItems = [
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
-  const [apiCount, setApiCount] = useState<number | null>(null)
+  const [usage, setUsage] = useState<{ total: number; byProvider: Record<string, number> } | null>(null)
 
   useEffect(() => {
     fetch('/api/serpapi-usage')
       .then(r => r.json())
-      .then(d => setApiCount(d.count ?? null))
+      .then(d => d.total != null ? setUsage({ total: d.total, byProvider: d.byProvider }) : null)
       .catch(() => {})
   }, [])
 
@@ -43,15 +43,24 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
             <span className="font-semibold text-slate-100 text-sm leading-tight">
               Flight Tracker <span className="text-emerald-400 font-normal">Lima</span>
             </span>
-            {apiCount !== null && (
-              <span className={cn(
-                'text-xs font-mono mt-0.5',
-                apiCount >= 95 ? 'text-red-400' :
-                apiCount >= 80 ? 'text-yellow-400' :
-                'text-slate-500'
-              )}>
-                {apiCount} consultas este mes
-              </span>
+            {usage !== null && (
+              <div className="mt-1 space-y-0.5">
+                {Object.entries(usage.byProvider).map(([provider, count]) => (
+                  <div key={provider} className="flex items-center gap-1.5">
+                    <span className={cn(
+                      'text-xs font-mono',
+                      count >= 95 ? 'text-red-400' :
+                      count >= 80 ? 'text-yellow-400' :
+                      'text-slate-500'
+                    )}>
+                      {provider}: {count}
+                    </span>
+                  </div>
+                ))}
+                {usage.total === 0 && (
+                  <span className="text-xs text-slate-600">0 consultas este mes</span>
+                )}
+              </div>
             )}
           </div>
         </div>
